@@ -1,15 +1,21 @@
-﻿using TrashlyLang.lexer;
+﻿using System.Diagnostics;
+using System.Web;
+using DotNetGraph.Compilation;
+using DotNetGraph.Core;
+using DotNetGraph.Extensions;
+using TrashlyLang.lexer;
 using TrashlyLang.Parser;
 
 class TrashlyLangRepl
 {
 	private static bool viewLex = false;
-	static void Main()
+	private static bool graph = false;
+	static async Task Main()
 	{
-		Repl(Console.In, Console.Out);
+		await Repl(Console.In, Console.Out);
 	}
 
-	static void Repl(TextReader reader, TextWriter writer)
+	static async Task Repl(TextReader reader, TextWriter writer)
 	{
 		bool repel = true;
 		while (repel)
@@ -39,9 +45,30 @@ class TrashlyLangRepl
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
-			foreach(var statement in parser.Program)
+			foreach (var statement in parser.Program)
 			{
-				writer.WriteLine(statement.ToString());
+				writer.Write(statement.ToString()+"\n");
+			}
+			
+			if (graph)
+			{
+				var graph = new DotGraph().WithIdentifier("Program Root");
+				foreach (var statement in parser.Program)
+				{
+					statement.ProcessGraph(graph);
+				}
+
+				await using var gwriter = new StringWriter();
+				var context = new CompilationContext(gwriter, new CompilationOptions());
+				await graph.CompileAsync(context);
+
+				var result = gwriter.GetStringBuilder().ToString();
+
+				// Save it to a file
+				//await File.WriteAllTextAsync("graph.dot", result);
+				var url = "https://dreampuf.github.io/GraphvizOnline/#" + Uri.EscapeDataString(result);
+				writer.WriteLine("---");
+				writer.WriteLine("'" + url + "'");
 			}
 		}
 	}

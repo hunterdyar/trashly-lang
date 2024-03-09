@@ -66,7 +66,6 @@ public class Parser
 		{
 			return p;
 		}
-		Console.Write($"no prec for {type}");
 		return 0;
 	}
 
@@ -122,7 +121,6 @@ public class Parser
 	//Parse to the right, eating tokens UNTIL we encounter a token with a binding power <= rbp.
 	public Expression ParseExpression(int minBindingPower=0) 
 	{
-		Console.Write($"-{minBindingPower}");
 		if (AtToken(TokenType.EOF))
 		{
 			//welp
