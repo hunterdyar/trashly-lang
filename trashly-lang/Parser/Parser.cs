@@ -1,10 +1,12 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 using System.Data;
 using System.Net.Mail;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.VisualBasic.CompilerServices;
 using TrashlyLang.ast;
 using TrashlyLang.lexer;
+using Boolean = TrashlyLang.ast.Boolean;
 
 namespace TrashlyLang.Parser;
 
@@ -46,6 +48,9 @@ public class Parser
 		prefixGenerators.Add(TokenType.Integer,ParseIntegerLiteral);
 		prefixGenerators.Add(TokenType.Bang,ParsePrefixExpression);
 		prefixGenerators.Add(TokenType.Minus,ParsePrefixExpression);
+		prefixGenerators.Add(TokenType.True,ParseBooleanLiteral);
+		prefixGenerators.Add(TokenType.False,ParseBooleanLiteral);
+		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
 		//infix
 		//todo: create "IntInfixExpression".
 		infixGenerators.Add(TokenType.Add,ParseInfixExpression);
@@ -61,20 +66,47 @@ public class Parser
 		{
 			return p;
 		}
-		return 1;
+		Console.Write($"no prec for {type}");
+		return 0;
+	}
+
+	public (int,int) InfixBindingPower(TokenType type)
+	{
+		switch (type)
+		{
+			case TokenType.Add:
+			case TokenType.Minus:
+				return (1, 2);
+			case TokenType.Asterisk:
+			case TokenType.Slash:
+				return (3, 4);
+			default: return (0,0);
+		}
 	}
 	public bool AtToken(TokenType type)
 	{
 		return _currentToken.Type == type;
 	}
-
+	
+	public void Parse()
+	{
+		//make a 'program' root node that is a list of statements.
+		//i used the word 'expression' in my AST and this is wrong.
+			
+		Next();
+		Next();
+		_program = new List<Node>();
+		while (_currentToken.Type != TokenType.EOF)
+		{
+			var statement = ParseStatement();
+			_program.Add(statement);
+		}
+	}
 	//move to the next token
 	public void Next()
 	{
-		//note: we start one 'behind' and need to go forward one then start.
 		_currentToken = _peekToken;
 		_peekToken = _lexer.NextToken();
-
 	}
 
 	//Assert the value of the current token, then move to next.
@@ -82,38 +114,62 @@ public class Parser
 	{
 		if (value != _currentToken.Type)
 		{
-			throw new Exception($"Expected {value}, got {_currentToken.Type.ToString()}");
+			throw new Exception($"Expected {value}, got {_currentToken.Type.ToString()}. It's probably your fault, not mine.");
 		}
 		Next();
 	}
 
 	//Parse to the right, eating tokens UNTIL we encounter a token with a binding power <= rbp.
-	public Expression ParseExpression(int rightBondPower) 
+	public Expression ParseExpression(int minBindingPower=0) 
 	{
+		Console.Write($"-{minBindingPower}");
 		if (AtToken(TokenType.EOF))
 		{
 			//welp
 			throw new Exception("Unexpected End of file.");
+		}else if (AtToken(TokenType.Semicolon))
+		{
+			//blank semicolons are allowed. this is allowed;;;;;
+			var empty = new EmptyExpression(_currentToken);
+			Eat(TokenType.Semicolon);
+			return empty;
 		}
-		
+
 		Expression expr = null;
 		if(!prefixGenerators.TryGetValue(_currentToken.Type, out var generator))
 		{
 			//uh oh, no prefix thingy
 			throw new Exception("Encountered prefix operator without a prefix thing in the thing.");
 			return null;
-		}
-		else
-		{
-			expr = generator(); //This parses the expression and any token before it.
-		}
+		} 
+		expr = generator(); //This parses the expression and any token before it.
+		
 
 		//while not semicolon, because theyre OPTIONAL BABY WHOO
-		while (_peekToken.Type != TokenType.Semicolon && rightBondPower < PeekPrecedence())
+		while (_peekToken.Type != TokenType.Semicolon)
 		{
+			//next we find an integer, and then....
+			var peek = _peekToken;
+			var bp = InfixBindingPower(peek.Type);
+			var cbp = InfixBindingPower(_currentToken.Type);
+				//currentToken?peekToken?
+			//first peek the integer (or whatever) until we peek the other.
+			//when this is >, it's all right associative
+			//when this is < it's all left associative
+			//the algorithm works (is supposed to work) by deciding via recursion to keep chewing forward (1+2+3+4), and stepping up out of recursion to "wrap up" what is has chewed.
+			
+			//we aren't getting the right values?
+			if (cbp.Item1 < minBindingPower)
+			{
+				break;
+			}
+			
+			//this whole section is just a fancy way to call ParseExpression again.
+			//but we do it differenlty for different operators. Which ones? no clue, the dictionary lookup for function calls is a clever way to handle it.
 			if(!infixGenerators.TryGetValue(_currentToken.Type, out var inGenerator))
 			{
-				//no infix. This must be a prefix, so we can just give it back without fluffing about with precedence.
+				//no infix. This must be a prefix, so we can just give it back without fluffing about with precedence.PeekPrecedence())
+				//if (when?) we do postfix (5!, 3++), we do a tryget here for that.
 				if (expr == null)
 				{
 					throw new Exception("encountered operator with no prefix OR infix thing in the thing");
@@ -125,35 +181,36 @@ public class Parser
 				expr = inGenerator(expr);
 			}
 		}
-		//Next();//this is probably wrong, expression functions should eat the tokens.
+
 		if (expr == null)
 		{
 			throw new Exception("We done goofed");
 		}
 		return expr;
 	}
-
-	int PeekPrecedence()
+	
+	public Expression ParsePrefixExpression()
 	{
-		//look up the precedence of peekToken.Type;
-		return GetPrecedence(_peekToken.Type);
-	}	
-	//entry point. We expect this to return a single root node.
-	public void Parse()
-	{
-		//make a 'program' root node that is a list of statements.
-		//i used the word 'expression' in my AST and this is wrong.
-		Next();
-		Next();
-		_program = new List<Node>();
-		while (_currentToken.Type != TokenType.EOF)
-		{
-			var statement = ParseStatement();
-			_program.Add(statement);
-		}
-		
+		var expression = new PrefixExpression(_currentToken);
+		expression.Operator = _currentToken.Literal;
+		Next();//eat the operator, but we don't know which one so we can't declare.
+		expression.right = ParseExpression(PrefixPrecedence);
+		return expression;
 	}
 
+	public Expression ParseInfixExpression(Expression left){
+		var expression = new InfixExpression(_currentToken);
+		expression.Operator = _currentToken.Literal;
+		var opType = _currentToken.Type;
+		expression.left = left;
+		// current precedence.
+		int precedence = _precedence[_currentToken.Type];
+		precedence = InfixBindingPower(opType).Item2;
+		Next();//consume the operator.
+		//this is the recursive call.
+		expression.right = ParseExpression(precedence);
+		return expression;
+	}
 	public Node ParseStatement()
 	{
 		switch (_currentToken.Type)
@@ -163,7 +220,9 @@ public class Parser
 			case TokenType.Return:
 				return ParseReturnStatement();
 			default:
-				var exp = ParseExpression(0);
+				//ParseExpressionStatement.
+				//ExpressionNode.Expression = this.
+				var exp = ParseExpression();
 				//skip semicolons! That's right, they're OPTIONAL.
 				//OPTIONAL SEMICOLONS ARE THE ONLY WRONG CHOICE TO WHETHER OR NOT YOU SHOULD HAVE SEMICOLONS
 				//MUAHAHAHAHA
@@ -179,28 +238,58 @@ public class Parser
 	public Node ParseLetStatement()
 	{
 		 Eat(TokenType.Let);
-		 var statement = new Identifier(_currentToken);
+		 var letStatement = new Identifier(_currentToken);
 		 Eat(TokenType.Identity);
 		 Eat(TokenType.Assign);
 		 //parse the right side of the =
-		 
-		 Next();
-		 statement.Value = ParseExpression(0);
-		 return statement;
+		 letStatement.Value = ParseExpression();
+		 //chew up the optional semicolon. yum yum.
+		 if (_peekToken.Type == TokenType.Semicolon)
+		{
+			Eat(TokenType.Semicolon);
+		}
+		 return letStatement;
 	}
 
 	public Node ParseReturnStatement()
 	{
 		var statement = new ReturnStatement(_currentToken);
 		Eat(TokenType.Return);
-		statement.ReturnValue = ParseExpression(0);
-		Next();
+		statement.ReturnValue = ParseExpression();
+		//Next();
 		if (_peekToken.Type == TokenType.Semicolon)
 		{
 			Next();
 		}
 
 		return statement;
+	}
+
+	private Node ParseBlockStatement()
+	{
+		var block = new BlockStatement(_currentToken);
+		Eat(TokenType.LeftBrace);
+		while (_currentToken.Type != TokenType.RightBrace)
+		{
+			var stmt = ParseStatement();
+			block.Statements.Add(stmt);
+			Next();
+		}
+		//eat the right paren?
+		return block;
+	}
+
+	private Expression ParseGroupedExpression()
+	{
+		var group = new GroupExpression(_currentToken);
+		Eat(TokenType.LeftParen);
+		var expression = ParseExpression(0);
+		group.Children.Add(expression);
+		//for, consume commas
+		
+		//eat the right )
+		Eat(TokenType.RightParen);
+		return group;
 	}
 	public Expression ParseIdentifier()
     {
@@ -216,23 +305,21 @@ public class Parser
 		return e;
 	}
 
-	public Expression ParsePrefixExpression()
+	public Expression ParseBooleanLiteral()
 	{
-		var expression = new PrefixExpression(_currentToken);
-		expression.Operator = _currentToken.Literal;
-		Next();//eat the operator, but we don't know which one so we can't declare.
-		expression.right = ParseExpression(PrefixPrecedence);
-		return expression;
+		if (_currentToken.Type == TokenType.True || _currentToken.Type == TokenType.False)
+		{
+			var b = new Boolean(_currentToken);
+			Next();
+			return b;
+		}
+		else
+		{
+			throw new Exception($"Can't parse. {_currentToken} is not a boolean");
+		}
+
+		return null;
 	}
 
-	public Expression ParseInfixExpression(Expression left)
-	{
-		var expression = new InfixExpression(_currentToken);
-		expression.Operator = _currentToken.Literal;
-		expression.left = left;
-		int precedence = _precedence[_currentToken.Type];
-		Next();
-		expression.right = ParseExpression(precedence);
-		return expression;
-	}
+	
 }

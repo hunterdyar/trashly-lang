@@ -11,6 +11,8 @@ public class Lexer
 	{
 		_input = input;
 		//initialize at 0 and 1
+		_pos = 0;
+		_readPos = 1;
 		//ReadCharacter();
 	}
 

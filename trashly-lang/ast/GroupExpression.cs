@@ -2,7 +2,7 @@
 
 namespace TrashlyLang.ast;
 
-public class GroupExpression : Node
+public class GroupExpression : Expression
 {
 	public List<Expression> Children;
 
@@ -20,5 +20,6 @@ public class GroupExpression : Node
 
 	public GroupExpression(Token token) : base(token)
 	{
+		Children = new List<Expression>();
 	}
 }

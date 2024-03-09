@@ -3,6 +3,7 @@ using TrashlyLang.Parser;
 
 class TrashlyLangRepl
 {
+	private static bool viewLex = false;
 	static void Main()
 	{
 		Repl(Console.In, Console.Out);
@@ -21,6 +22,18 @@ class TrashlyLangRepl
 			}else if (line == "exit" || line == "quit")
 			{
 				break;
+			}
+
+			if (viewLex)
+			{
+				Lexer dLEx = new Lexer(line);
+				var a = dLEx.GetAllLexDebug();
+				foreach (var t in a)
+				{
+					writer.WriteLine(t.Type);
+				}
+
+				writer.WriteLine("------");
 			}
 
 			Lexer lex = new Lexer(line);
