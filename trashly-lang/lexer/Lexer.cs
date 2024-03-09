@@ -5,7 +5,7 @@ public class Lexer
 	private string _input;
 	private int _pos;
 	private int _readPos; //peek position
-	private char Character => PeekCharacter();
+	private char Character => CurrentCharacter();
 
 	public Lexer(string input)
 	{
@@ -20,12 +20,16 @@ public class Lexer
 		_readPos += 1;
 	}
 
+	public char CurrentCharacter()
+	{
+		return _pos < _input.Length ? _input[_pos] : '\0';
+	}
 	public char PeekCharacter()
 	{
 		return _readPos < _input.Length ? _input[_readPos] : '\0';
 	}
 
-	public List<Token> GetAllLex()
+	public List<Token> GetAllLexDebug()
 	{
 		if (_input == "")
 		{
@@ -147,7 +151,7 @@ public class Lexer
 			ReadCharacter();
 		}
 
-		return _input.Substring(pos, _pos - pos+1);
+		return _input.Substring(pos, _pos - pos);
 	}
 
 	private string ReadNumber()
@@ -159,7 +163,7 @@ public class Lexer
 			ReadCharacter();
 		}
 
-		return _input.Substring(pos, _pos - pos+1);
+		return _input.Substring(pos, _pos - pos);
 	}
 	private void EatWhitespace()
 	{

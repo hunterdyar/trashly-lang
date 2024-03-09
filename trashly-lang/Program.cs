@@ -1,4 +1,5 @@
 ﻿using TrashlyLang.lexer;
+using TrashlyLang.Parser;
 
 class TrashlyLangRepl
 {
@@ -23,11 +24,11 @@ class TrashlyLangRepl
 			}
 
 			Lexer lex = new Lexer(line);
-			var toks = lex.GetAllLex();
-
-			foreach(var token in toks)
+			Parser parser = new Parser(lex);
+			parser.Parse();
+			foreach(var statement in parser.Program)
 			{
-				writer.WriteLine(token.Type.ToString());
+				writer.WriteLine(statement.ToString());
 			}
 		}
 	}
