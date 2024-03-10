@@ -4,6 +4,7 @@ using DotNetGraph.Core;
 using DotNetGraph.Extensions;
 using TrashlyLang.evaluator;
 using TrashlyLang.lexer;
+using TrashlyLang.memory;
 using TrashlyLang.Parser;
 
 class TrashlyLangRepl
@@ -42,6 +43,7 @@ class TrashlyLangRepl
 				writer.WriteLine("------");
 			}
 
+			Memory m = new Memory(128,128);
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
@@ -73,6 +75,8 @@ class TrashlyLangRepl
 				writer.WriteLine("---");
 				writer.WriteLine("'" + url + "'");
 			}
+
+			await m.Export();
 		}
 	}
 }
