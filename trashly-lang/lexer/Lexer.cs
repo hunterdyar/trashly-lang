@@ -153,8 +153,14 @@ public class Lexer
 		while (IsLetter(Character))
 		{
 			ReadCharacter();
+			var current = _input.Substring(pos, _pos - pos);
+			//end brace takes precedence over variables. so "xXreturn fiveXx" should eval to {,RET,IDENT(five),}
+			//so we have to do this stupid slow thing so our bad idea can work.
+			if (current == "xX" || current == "Xx" || current == "Oo" || current == "oO")
+			{
+				return current;
+			}
 		}
-
 		return _input.Substring(pos, _pos - pos);
 	}
 

@@ -41,6 +41,10 @@ public struct Token
 				return TokenType.If;
 			case "else":
 				return TokenType.Else;
+			case "oO":
+				return TokenType.LeftParen;
+			case "Oo":
+				return TokenType.RightParen;
 			default:
 				//must be a user-created keyword AKA identity.
 				return TokenType.Identity;
