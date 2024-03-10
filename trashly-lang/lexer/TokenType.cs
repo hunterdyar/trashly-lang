@@ -28,5 +28,6 @@ public enum TokenType
 	Else,
 	Identity,
 	Integer,
+	String,
 	EOF
 }

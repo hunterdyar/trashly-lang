@@ -7,29 +7,13 @@ public class Integer : Object
 {
 	public override ObjectType Type => ObjectType.Int;
 	public static int MemSize => 8;
-	public int Value;//temp!
+	public int Value;//temp! only used during expressions right now.
 
 	public Integer(int value)
 	{
 		Value = value;
 	}
 
-	/* 	public override int GetValueFromBytes(BitArray bits)
-	{
-		int val = 0;
-		for (var i = 0; i < bits.Count; i++)
-		{
-			//this is a terrible way to do this, but I hope to replace the bitarray with direct 'memory' reads :)
-			//so i am halfway in the bad-but-fun direction.
-			if (bits[i])
-			{
-				val += i ^ 2;
-			}
-		}
-
-		return val;
-	}
-*/
 	public static Integer Construct(bool[] data)
 	{
 		int val = Decode(data);

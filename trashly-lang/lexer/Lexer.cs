@@ -108,6 +108,9 @@ public class Lexer
 			case '/':
 				token = new Token(TokenType.Slash, Character);
 				break;
+			case '"':
+				token = new Token(TokenType.String, ReadString());
+				break;
 			case '!':
 				if (PeekCharacter() == '=')
 				{
@@ -172,6 +175,17 @@ public class Lexer
 			//this increments _pos
 			ReadCharacter();
 		}
+
+		return _input.Substring(pos, _pos - pos);
+	}
+
+	private string ReadString()
+	{
+		int pos = _pos+1;//plus 1 past the first "
+		do
+		{
+			ReadCharacter();
+		} while (Character != '"' && Character != 0);
 
 		return _input.Substring(pos, _pos - pos);
 	}

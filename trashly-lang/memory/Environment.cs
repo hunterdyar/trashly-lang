@@ -2,6 +2,7 @@
 using TrashlyLang.objects;
 using Boolean = TrashlyLang.objects.Boolean;
 using Object = TrashlyLang.objects.Object;
+using String = TrashlyLang.objects.String;
 
 namespace TrashlyLang.memory;
 
@@ -38,10 +39,11 @@ public class Environment
 			throw new Exception($"oops! Can't create {identifier}, it already exists. You feool!");
 		}
 
-		var size = GetMemorySize(o.Type);
+		var data = Encode(o);
+		var size = data.Length;//=MemSize... no need! we trust the encoders.
 		var loc = Memory.GetAvailableMemoryLocation(size, true);
 		_dataStore.Add(identifier,(loc,o.Type));
-		Memory.Write(loc,Encode(o));
+		Memory.Write(loc,data);
 	}
 
 	public Object Get(string identifier)
@@ -54,15 +56,22 @@ public class Environment
 		
 		if(_dataStore.TryGetValue(identifier, out var value))
 		{
-			var data = Memory.Read(value.loc, GetMemorySize(value.type));
 			switch (value.type)
             {
                 case ObjectType.Null:
                     return new Null();
                 case ObjectType.Int:
-                    return Integer.Construct(data);
+					var intData = Memory.Read(value.loc, GetMemorySize(value.type));
+                    return Integer.Construct(intData);
                 case ObjectType.Bool:
-                    return Boolean.Construct(data);
+					var boolData = Memory.Read(value.loc, GetMemorySize(value.type));
+                    return Boolean.Construct(boolData);
+                case ObjectType.String:
+					var sizeData = Memory.Read(value.loc, GetMemorySize(ObjectType.Int));
+	                int stringLength = Integer.Decode(sizeData);
+	                int stringStartLoc = value.loc + GetMemorySize(ObjectType.Int);
+	                var stringData = Memory.Read(stringStartLoc, stringLength * GetMemorySize(ObjectType.Character));
+	                return String.Construct(stringLength, stringData);
             }
 		}
 		else
@@ -114,8 +123,10 @@ public class Environment
 			{
 				return new bool[] { false };
 			}
+		}else if (o is String s)
+		{
+			return String.Encode(s.Value);
 		}
-
 		return Array.Empty<bool>();
 	}
 
@@ -127,6 +138,8 @@ public class Environment
 				return Boolean.MemSize;//1
 			case ObjectType.Int:
 				return Integer.MemSize;//8
+			case ObjectType.Character:
+				return 8;//utf-8
 			default://nulls,functions
 				return 0;
 		}

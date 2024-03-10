@@ -8,6 +8,7 @@ using Object = TrashlyLang.objects.Object;
 using Boolean = TrashlyLang.objects.Boolean;
 using Environment = TrashlyLang.memory.Environment;
 using Expression = TrashlyLang.ast.Expression;
+using String = TrashlyLang.objects.String;
 
 namespace TrashlyLang.evaluator;
 
@@ -54,6 +55,9 @@ public class Evaluator
 		else if (node is BooleanLiteral bl)
 		{
 			return Boolean.FromType(bl.Token.Type);
+		}else if (node is StringLiteral sl)
+		{
+			return String.FromNativeString(sl.Token.Literal);
 		}else if (node is ReturnStatement rs)
 		{
 			//wrap the object in a returnobject.

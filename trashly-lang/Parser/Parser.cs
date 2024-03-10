@@ -54,6 +54,7 @@ public class Parser
 		prefixGenerators.Add(TokenType.LeftBrace,ParseBlockExpression);
 		prefixGenerators.Add(TokenType.If,ParseIfExpression);
 		prefixGenerators.Add(TokenType.Function,ParseFunctionLiteral);
+		prefixGenerators.Add(TokenType.String,ParseStringLiteral);
 	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
 		//infix
 		//todo: create "IntInfixExpression".
@@ -328,6 +329,13 @@ public class Parser
 		var e= new IntegerLiteral(_currentToken); 
 		Eat(TokenType.Integer);
 		return e;
+	}
+
+	public Expression ParseStringLiteral()
+	{
+		var s = new StringLiteral(_currentToken);
+		Eat(TokenType.String);
+		return s;
 	}
 
 	public Expression ParseBooleanLiteral()
