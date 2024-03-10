@@ -64,6 +64,7 @@ public class Lexer
 					//I decided that the literal needs to be the data from the file as a rule
 					//for debugging. even if we're _extremely_ confident that literal becomes '==' (as it should)
 					string literal = Character.ToString() + PeekCharacter().ToString();
+					ReadCharacter();//skip ahead to consume the ==
 					token = new Token(TokenType.Equals, literal);
 				}
 				else
@@ -111,6 +112,7 @@ public class Lexer
 				if (PeekCharacter() == '=')
 				{
 					string literal = Character.ToString() + PeekCharacter().ToString();
+					ReadCharacter();
 					token = new Token(TokenType.NotEqual, literal);
 				}
 				else

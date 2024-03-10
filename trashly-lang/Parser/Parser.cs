@@ -32,6 +32,7 @@ public class Parser
 		_lexer = lexer;
 		//order of operations init
 		_precedence.Add(TokenType.Equals,2);
+		_precedence.Add(TokenType.NotEqual,2);
 		_precedence.Add(TokenType.LessThan,3);
 		_precedence.Add(TokenType.GreaterThan,3);
 		_precedence.Add(TokenType.Add,5);
@@ -58,6 +59,8 @@ public class Parser
 		infixGenerators.Add(TokenType.Minus,ParseInfixExpression);
 		infixGenerators.Add(TokenType.Asterisk,ParseInfixExpression);
 		infixGenerators.Add(TokenType.Slash,ParseInfixExpression);
+		infixGenerators.Add(TokenType.Equals,ParseInfixExpression);
+		infixGenerators.Add(TokenType.NotEqual,ParseInfixExpression);
 		//+,-,/,*,==,!=,<,>
 	}
 

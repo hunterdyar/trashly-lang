@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using TrashlyLang.ast;
+using TrashlyLang.lexer;
 using TrashlyLang.objects;
 using Object = TrashlyLang.objects.Object;
 using Boolean = TrashlyLang.objects.Boolean;
@@ -31,7 +32,6 @@ public class Evaluator
 			{
 				result = Eval(e);
 			}
-
 			return result;
 		}else if(node is InfixExpression ife)
 		{
@@ -75,8 +75,20 @@ public class Evaluator
 		{
 			case "+":
 				return Math.Sum(left, right);
+			case "-":
+				return Math.Subtract(left, right);
 			case "*":
 				return Math.Multiply(left, right);
+			case "/":
+				return Math.Divide(left, right);
+			case "<":
+				return BoolMath.Compare(TokenType.LessThan, left, right);
+			case ">":
+				return BoolMath.Compare(TokenType.GreaterThan, left, right);
+			case "==":
+				return BoolMath.Compare(TokenType.Equals, left, right);
+			case "!=":
+				return BoolMath.Compare(TokenType.NotEqual, left, right);
 		}
 
 		throw new Exception($"I can't do {ife.Operator} operator yet.");

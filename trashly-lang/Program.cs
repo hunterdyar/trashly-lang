@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Web;
+﻿
 using DotNetGraph.Compilation;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
@@ -53,6 +52,7 @@ class TrashlyLangRepl
 				writer.Write(o.Inspect()+"\n");
 			}
 			
+			//todo: move the dependency to graph to it's own class/area.
 			if (graph)
 			{
 				var graph = new DotGraph().WithIdentifier("Program Root");
