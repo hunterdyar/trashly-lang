@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using TrashlyLang.evaluator;
+using TrashlyLang.lexer;
 
 namespace TrashlyLang.objects;
 
@@ -10,12 +12,13 @@ public class Boolean : Object
 	{
 		b = b.ToLower();
 		var bo = new Boolean();
-		if (b == "false" || b == "0" || b == "no" || b == "naaah")
+		//we don't support casting
+		if (b == "false")
 		{
 			bo.Value = false;
 			return bo;
 		}
-		else if(b == "true" || b == "1" || b == "yes" || b == "yeauh" || b == "yeah")
+		else if(b == "true")
 		{
 			bo.Value = true;
 			return bo;
@@ -34,6 +37,20 @@ public class Boolean : Object
 		else
 		{
 			return "naaah";
+		}
+	}
+
+	public static Object FromType(TokenType tokenType)
+	{
+		switch (tokenType)
+		{
+			case TokenType.True:
+				return BoolMath.TRUE;
+			case TokenType.False:
+				return BoolMath.FALSE;
+			default:
+				throw new Exception($"{tokenType} is no boolean, sir.");
+				return BoolMath.FALSE;
 		}
 	}
 }

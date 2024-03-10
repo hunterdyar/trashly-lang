@@ -50,6 +50,7 @@ public class Parser
 		prefixGenerators.Add(TokenType.True,ParseBooleanLiteral);
 		prefixGenerators.Add(TokenType.False,ParseBooleanLiteral);
 		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
+		prefixGenerators.Add(TokenType.LeftBrace,ParseBlockExpression);
 	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
 		//infix
 		//todo: create "IntInfixExpression".
@@ -137,7 +138,7 @@ public class Parser
 		if(!prefixGenerators.TryGetValue(_currentToken.Type, out var generator))
 		{
 			//uh oh, no prefix thingy
-			throw new Exception("Encountered prefix operator without a prefix thing in the thing.");
+			throw new Exception($"Encountered prefix operator {_currentToken.Type} without a prefix thing in the thing.");
 			return null;
 		} 
 		expr = generator(); //This parses the expression and any token before it.
@@ -274,10 +275,25 @@ public class Parser
 			var stmt = ParseStatement();
 			block.Statements.Add(stmt);
 		}
+
 		Eat(TokenType.RightBrace);
 		return block;
-		
 	}
+	
+	private Expression ParseBlockExpression()
+	{
+		var block = new GroupExpression(_currentToken);
+		Eat(TokenType.LeftBrace);
+		while (_currentToken.Type != TokenType.RightBrace)
+		{
+			var express = ParseExpression(0);
+			block.Children.Add(express);
+		}
+
+		Eat(TokenType.RightBrace);
+		return block;
+	}
+
 
 	private Expression ParseGroupedExpression()
 	{
