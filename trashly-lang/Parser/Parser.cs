@@ -17,10 +17,12 @@ public class Parser
 	private Token _currentToken = new Token(TokenType.EOF, "");
 	private Token _peekToken = new Token(TokenType.EOF, "");
 	public List<Node> Program => _program;
+
 	private List<Node> _program; //root statements.
 	private int PrefixPrecedence;
+	public List<String> Errors => _errors;
+	private List<string> _errors = new List<string>();
 	delegate Expression PrefixExpressionFactory();
-
 	delegate Expression InfixExpressionFactory(Expression left);
 
 	private Dictionary<TokenType, int> _precedence = new Dictionary<TokenType, int>();
@@ -97,6 +99,7 @@ public class Parser
 	
 	public void Parse()
 	{
+		_errors = new List<string>();
 		//make a 'program' root node that is a list of statements.
 		//i used the word 'expression' in my AST and this is wrong.
 			
@@ -106,6 +109,10 @@ public class Parser
 		while (_currentToken.Type != TokenType.EOF)
 		{
 			var statement = ParseStatement();
+			if (_errors.Count > 0)
+			{
+				break;
+			}
 			_program.Add(statement);
 		}
 	}
@@ -121,7 +128,7 @@ public class Parser
 	{
 		if (value != _currentToken.Type)
 		{
-			throw new Exception($"Expected {value}, got {_currentToken.Type.ToString()}. It's probably your fault, not mine.");
+			_errors.Add($"Expected {value}, got {_currentToken.Type.ToString()}. It's probably your fault, not mine.");
 		}
 		Next();
 	}
@@ -132,7 +139,7 @@ public class Parser
 		if (AtToken(TokenType.EOF))
 		{
 			//welp
-			throw new Exception("Unexpected End of file.");
+			_errors.Add("Unexpected End of file.");
 		}else if (AtToken(TokenType.Semicolon))
 		{
 			//blank semicolons are allowed. this is allowed;;;;;
@@ -145,7 +152,7 @@ public class Parser
 		if(!prefixGenerators.TryGetValue(_currentToken.Type, out var generator))
 		{
 			//uh oh, no prefix thingy
-			throw new Exception($"Encountered prefix operator {_currentToken.Type} without a prefix thing in the thing.");
+			_errors.Add($"Encountered prefix operator {_currentToken.Type} without a prefix thing in the thing.");
 			return null;
 		} 
 		expr = generator(); //This parses the expression and any token before it.
@@ -178,7 +185,7 @@ public class Parser
 				//if (when?) we do postfix (5!, 3++), we do a tryget here for that.
 				if (expr == null)
 				{
-					throw new Exception("encountered operator with no prefix OR infix thing in the thing");
+					_errors.Add("encountered operator with no prefix OR infix thing in the thing");
 				}
 				return expr;
 			}
@@ -190,7 +197,7 @@ public class Parser
 
 		if (expr == null)
 		{
-			throw new Exception("We done goofed");
+			_errors.Add("We done goofed");
 		}
 		return expr;
 	}
@@ -348,7 +355,7 @@ public class Parser
 		}
 		else
 		{
-			throw new Exception($"Can't parse. {_currentToken} is not a boolean");
+			_errors.Add($"Can't parse. {_currentToken} is not a boolean");
 		}
 
 		return null;

@@ -50,6 +50,14 @@ class TrashlyLangRepl
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
+			if (parser.Errors.Count > 0)
+			{
+				await writer.WriteLineAsync("ERROR - Parsing Error... It's likely that only the first error is the problem.");
+				foreach (var error in parser.Errors)
+				{
+					await writer.WriteLineAsync(error);
+				}
+			}
 			Evaluator evaluator = new Evaluator(env);
 			var r = evaluator.EvaluateProgram(parser);	
 			writer.WriteLine(r.Inspect());
