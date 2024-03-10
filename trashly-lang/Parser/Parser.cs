@@ -246,7 +246,8 @@ public class Parser
 	public Node ParseLetStatement()
 	{
 		 Eat(TokenType.Let);
-		 var letStatement = new Identifier(_currentToken);
+		 var letStatement = new LetStatement(_currentToken);
+		 letStatement.Identifier = new Identifier(_currentToken);
 		 Eat(TokenType.Identity);
 		 Eat(TokenType.Assign);
 		 //parse the right side of the =

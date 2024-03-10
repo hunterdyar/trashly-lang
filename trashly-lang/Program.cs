@@ -6,6 +6,7 @@ using TrashlyLang.evaluator;
 using TrashlyLang.lexer;
 using TrashlyLang.memory;
 using TrashlyLang.Parser;
+using Environment = TrashlyLang.memory.Environment;
 
 class TrashlyLangRepl
 {
@@ -19,6 +20,9 @@ class TrashlyLangRepl
 	static async Task Repl(TextReader reader, TextWriter writer)
 	{
 		bool repel = true;
+		Memory m = new Memory(32,32);
+		await m.Export();
+		Environment env = new Environment(m);
 		while (repel)
 		{
 			Console.Write("~~> ");
@@ -43,12 +47,11 @@ class TrashlyLangRepl
 				writer.WriteLine("------");
 			}
 
-			Memory m = new Memory(128,128);
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
-			Evaluator evaluator = new Evaluator(m);
-			var r = evaluator.EvaluateProgram(parser);	
+			Evaluator evaluator = new Evaluator();
+			var r = evaluator.EvaluateProgram(parser, env);	
 			writer.WriteLine(r.Inspect());
 			//todo: move the dependency to graph to it's own class/area.
 			if (graph)

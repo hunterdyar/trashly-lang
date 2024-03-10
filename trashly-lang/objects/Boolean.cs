@@ -6,6 +6,8 @@ namespace TrashlyLang.objects;
 
 public class Boolean : Object
 {
+	public static int MemSize => 1;
+	public override ObjectType Type => ObjectType.Bool;
 	public bool Value;
 
 	public static Boolean FromString(string b)
@@ -37,6 +39,18 @@ public class Boolean : Object
 		else
 		{
 			return "naaah";
+		}
+	}
+
+	public static Object Construct(bool[] data)
+	{
+		if (data[0])
+		{
+			return BoolMath.TRUE;
+		}
+		else
+		{
+			return BoolMath.FALSE;
 		}
 	}
 

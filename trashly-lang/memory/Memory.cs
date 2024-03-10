@@ -21,7 +21,7 @@ public class Memory
 		{
 			for (int j = 0; j < Height; j++)
 			{
-				MemoryImage.SetPixel(i,j,SKColors.Blue);
+				MemoryImage.SetPixel(i,j,SKColors.Black);
 			}
 		}
 	}
@@ -100,8 +100,8 @@ public class Memory
 		for (int i = 0; i < count; i++)
         {
         	var loc = PositionToLocation(position + i);
-        	var color = MemoryImage.GetPixel(loc.x, loc.y);
-        	color = color.WithGreen(1);//make available.
+        	var color = MemoryImage.GetPixel(loc.x, loc.y);//current value
+        	color = color.WithGreen(byte.MaxValue);//make available.
         	MemoryImage.SetPixel(loc.x,loc.y,color);
         }
 	}
@@ -111,7 +111,7 @@ public class Memory
 		{
 			var loc = PositionToLocation(position + i);
 			var color = MemoryImage.GetPixel(loc.x, loc.y);
-			color = color.WithGreen(0);//make available.
+			color = color.WithGreen(byte.MinValue);//make available.
 			MemoryImage.SetPixel(loc.x,loc.y,color);
 		}
 	}

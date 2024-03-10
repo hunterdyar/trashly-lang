@@ -55,13 +55,13 @@ public static class BoolMath
 			switch (comp)
 			{ 
 				case TokenType.LessThan:
-					return NativeBoolToBoolObject(li.value < ri.value);
+					return NativeBoolToBoolObject(li.Value < ri.Value);
 				case TokenType.GreaterThan:
-					return NativeBoolToBoolObject(li.value > ri.value);
+					return NativeBoolToBoolObject(li.Value > ri.Value);
 				case TokenType.Equals:
-					return NativeBoolToBoolObject(li.value == ri.value);
+					return NativeBoolToBoolObject(li.Value == ri.Value);
 				case TokenType.NotEqual:
-					return NativeBoolToBoolObject(li.value != ri.value);
+					return NativeBoolToBoolObject(li.Value != ri.Value);
 			}
 		}else if (left is Boolean lb && right is Boolean rb)
 		{

@@ -10,9 +10,8 @@ public static class Math
 		if (a is Integer ai && b is Integer bi)
 		{
 			//todo replace with bitwise FOR FUN.
-			int val = ai.value + bi.value;
-			Integer sum = new Integer();
-			sum.value = val;
+			int val = ai.Value + bi.Value;
+			Integer sum = new Integer(val);
 			return sum;
 		}
 		else
@@ -20,14 +19,14 @@ public static class Math
 			throw new Exception($"Can't do + on {a} and {b}");
 		}
 	}
-public static Integer Subtract(Object a, Object b)
+	public static Integer Subtract(Object a, Object b)
+
 	{
 		if (a is Integer ai && b is Integer bi)
 		{
 			//todo replace with bitwise FOR FUN.
-			int val = ai.value - bi.value;
-			Integer sum = new Integer();
-			sum.value = val;
+			int val = ai.Value - bi.Value;
+			Integer sum = new Integer(val);
 			return sum;
 		}
 		else
@@ -40,9 +39,8 @@ public static Integer Subtract(Object a, Object b)
 		if (a is Integer ai && b is Integer bi)
 		{
 			//todo replace with bitwise FOR FUN.
-			int val = ai.value * bi.value;
-			Integer product = new Integer();
-			product.value = val;
+			int val = ai.Value * bi.Value;
+			Integer product = new Integer(val);
 			return product;
 		}
 		else
@@ -56,7 +54,7 @@ public static Integer Subtract(Object a, Object b)
 		if (value is Integer val)
 		{
 			//todo replace with bitwise FOR FUN.
-			val.value = -val.value;	
+			val.Value = -val.Value;	
 			return val;
 		}
 		else
@@ -70,14 +68,13 @@ public static Integer Subtract(Object a, Object b)
 		if (a is Integer ai && b is Integer bi)
 		{
 			//todo replace with bitwise FOR FUN.
-			if (bi.value == 0)
+			if (bi.Value == 0)
 			{
 				throw new Exception(
 					"Trying to divide by 0. Are you trying to break computer? cus that's how you break computer!");
 			}
-			int val = ai.value / bi.value;
-			Integer product = new Integer();
-			product.value = val;
+			int val = ai.Value / bi.Value;
+			Integer product = new Integer(val);
 			return product;
 		}
 		else
