@@ -13,5 +13,19 @@ public class FunctionLiteral : Node
 	public FunctionLiteral(Token token) : base(token)
 	{
 	}
-	
+
+	public override string ToString()
+	{
+		var str = Identity.ToString();
+		str += "(";
+		foreach (var parameter in Parameters)
+		{
+			str += parameter.ToString() + ",";
+		}
+
+		str += "){";
+		str += Body.ToString();
+		str += "}";
+		return str;
+	}
 }

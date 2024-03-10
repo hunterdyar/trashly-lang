@@ -62,6 +62,7 @@ public class Parser
 		infixGenerators.Add(TokenType.Slash,ParseInfixExpression);
 		infixGenerators.Add(TokenType.Equals,ParseInfixExpression);
 		infixGenerators.Add(TokenType.NotEqual,ParseInfixExpression);
+		infixGenerators.Add(TokenType.LeftParen,ParseCallExpression);
 		//+,-,/,*,==,!=,<,>
 	}
 
@@ -251,7 +252,7 @@ public class Parser
 		 //parse the right side of the =
 		 letStatement.Value = ParseExpression();
 		 //chew up the optional semicolon. yum yum.
-		 if (_peekToken.Type == TokenType.Semicolon)
+		 if (_currentToken.Type == TokenType.Semicolon)
 		{
 			Eat(TokenType.Semicolon);
 		}
@@ -264,9 +265,9 @@ public class Parser
 		Eat(TokenType.Return);
 		statement.ReturnValue = ParseExpression();
 		//Next();
-		if (_peekToken.Type == TokenType.Semicolon)
+		if (_currentToken.Type == TokenType.Semicolon)
 		{
-			Next();
+			Eat(TokenType.Semicolon);
 		}
 
 		return statement;
@@ -402,5 +403,38 @@ public class Parser
 		Eat(TokenType.RightParen);
 		return parameters;
 	}
-	
+
+	public Expression ParseCallExpression(Expression left)
+	{
+		var e = new CallExpression(_currentToken);
+		e.Function = left;
+		e.Arguments = ParseCallArguments(); //eats the ( and )
+		if (_currentToken.Type == TokenType.Semicolon)
+		{
+			Eat(TokenType.Semicolon);
+		}
+
+		return e;
+	}
+
+	public List<Expression> ParseCallArguments()
+	{
+		Eat(TokenType.LeftParen);
+		var args = new List<Expression>();
+		if (_currentToken.Type == TokenType.RightParen)
+		{
+			Eat(TokenType.RightParen);
+			return args;
+		}
+		//first expression
+		args.Add(ParseExpression());
+		//commas and next expressions
+		while (_currentToken.Type == TokenType.Comma)
+		{
+			Eat(TokenType.Comma);
+			args.Add(ParseExpression());
+		}
+		Eat(TokenType.RightParen);
+		return args;
+	}
 }

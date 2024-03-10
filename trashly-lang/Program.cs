@@ -47,13 +47,9 @@ class TrashlyLangRepl
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
-			Evaluator evaluator = new Evaluator();
-			foreach (var statement in parser.Program)
-			{
-				var o = evaluator.Eval(statement);
-				writer.Write(o.Inspect()+"\n");
-			}
-			
+			Evaluator evaluator = new Evaluator(m);
+			var r = evaluator.EvaluateProgram(parser);	
+			writer.WriteLine(r.Inspect());
 			//todo: move the dependency to graph to it's own class/area.
 			if (graph)
 			{
