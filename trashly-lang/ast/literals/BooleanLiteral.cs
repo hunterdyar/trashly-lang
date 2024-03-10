@@ -2,10 +2,10 @@
 
 namespace TrashlyLang.ast;
 
-public class Boolean : Expression
+public class BooleanLiteral : Expression
 {
 	private string literal;
-	public Boolean(Token token) : base(token)
+	public BooleanLiteral(Token token) : base(token)
 	{
 		literal = token.Literal;
 	}

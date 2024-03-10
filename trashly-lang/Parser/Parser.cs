@@ -6,7 +6,6 @@ using System.Reflection.Metadata.Ecma335;
 using Microsoft.VisualBasic.CompilerServices;
 using TrashlyLang.ast;
 using TrashlyLang.lexer;
-using Boolean = TrashlyLang.ast.Boolean;
 
 namespace TrashlyLang.Parser;
 
@@ -51,6 +50,7 @@ public class Parser
 		prefixGenerators.Add(TokenType.True,ParseBooleanLiteral);
 		prefixGenerators.Add(TokenType.False,ParseBooleanLiteral);
 		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
+	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
 		//infix
 		//todo: create "IntInfixExpression".
 		infixGenerators.Add(TokenType.Add,ParseInfixExpression);
@@ -217,6 +217,8 @@ public class Parser
 				return ParseLetStatement();
 			case TokenType.Return:
 				return ParseReturnStatement();
+			case TokenType.LeftBrace:
+				return ParseBlockStatement();
 			default:
 				//ParseExpressionStatement.
 				//ExpressionNode.Expression = this.
@@ -271,10 +273,10 @@ public class Parser
 		{
 			var stmt = ParseStatement();
 			block.Statements.Add(stmt);
-			Next();
 		}
-		//eat the right paren?
+		Eat(TokenType.RightBrace);
 		return block;
+		
 	}
 
 	private Expression ParseGroupedExpression()
@@ -298,7 +300,7 @@ public class Parser
 
 	public Expression ParseIntegerLiteral()
 	{
-		var e= new Integer(_currentToken); 
+		var e= new IntegerLiteral(_currentToken); 
 		Eat(TokenType.Integer);
 		return e;
 	}
@@ -307,7 +309,7 @@ public class Parser
 	{
 		if (_currentToken.Type == TokenType.True || _currentToken.Type == TokenType.False)
 		{
-			var b = new Boolean(_currentToken);
+			var b = new BooleanLiteral(_currentToken);
 			Next();
 			return b;
 		}

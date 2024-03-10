@@ -3,6 +3,7 @@ using System.Web;
 using DotNetGraph.Compilation;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
+using TrashlyLang.evaluator;
 using TrashlyLang.lexer;
 using TrashlyLang.Parser;
 
@@ -45,9 +46,11 @@ class TrashlyLangRepl
 			Lexer lex = new Lexer(line);
 			Parser parser = new Parser(lex);
 			parser.Parse();
+			Evaluator evaluator = new Evaluator();
 			foreach (var statement in parser.Program)
 			{
-				writer.Write(statement.ToString()+"\n");
+				var o = evaluator.Eval(statement);
+				writer.Write(o.Inspect()+"\n");
 			}
 			
 			if (graph)

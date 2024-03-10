@@ -4,10 +4,10 @@ using TrashlyLang.lexer;
 
 namespace TrashlyLang.ast;
 
-public class Integer : Expression
+public class IntegerLiteral : Expression
 {
 	private string literal;
-	public Integer(Token token) : base(token)
+	public IntegerLiteral(Token token) : base(token)
 	{
 		literal = token.Literal;
 	}
