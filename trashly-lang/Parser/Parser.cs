@@ -52,6 +52,7 @@ public class Parser
 		prefixGenerators.Add(TokenType.False,ParseBooleanLiteral);
 		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
 		prefixGenerators.Add(TokenType.LeftBrace,ParseBlockExpression);
+		prefixGenerators.Add(TokenType.If,ParseIfExpression);
 	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
 		//infix
 		//todo: create "IntInfixExpression".
@@ -223,6 +224,8 @@ public class Parser
 				return ParseReturnStatement();
 			case TokenType.LeftBrace:
 				return ParseBlockStatement();
+			case TokenType.Function:
+				return ParseFunctionLiteral();
 			default:
 				//ParseExpressionStatement.
 				//ExpressionNode.Expression = this.
@@ -340,5 +343,64 @@ public class Parser
 		return null;
 	}
 
+	public Expression ParseIfExpression()
+	{
+		var e = new IfExpression(_currentToken);
+		Eat(TokenType.If);
+		Eat(TokenType.LeftParen);
+		e.Condition = ParseExpression();
+		Eat(TokenType.RightParen);
+		e.Consequence = ParseBlockExpression();//eats left and right brace
+		
+		//for else if's, basically this but in a loop? ish
+		if (_currentToken.Type == TokenType.Else)
+		{
+			e.HasAlt = true;
+			Eat(TokenType.Else);
+			e.Alternative = ParseBlockExpression();
+		}
+		else
+		{
+			e.HasAlt = false;
+		}
+		return e;
+	}
+
+	public Node ParseFunctionLiteral()
+	{
+		var e = new FunctionLiteral(_currentToken);
+		Eat(TokenType.Function);
+		e.Identity = new Identifier(_currentToken);
+		Eat(TokenType.Identity);
+		e.Parameters = ParseFunctionParameters();//eat ()
+		e.Body = ParseBlockStatement();// eat {}
+		return e;
+	}
+
+	public List<Identifier> ParseFunctionParameters()
+	{
+		Eat(TokenType.LeftParen);
+		List<Identifier> parameters = new List<Identifier>();
+		//no parameters
+		if (_currentToken.Type == TokenType.RightParen)
+		{
+			Eat(TokenType.RightParen);
+			return parameters;
+		}
+		//first parameter
+		var i = new Identifier(_currentToken);
+		parameters.Add(i);
+		Eat(TokenType.Identity);
+		//further parameters and the preceding comma.
+		while (_currentToken.Type == TokenType.Comma)
+		{
+			Eat(TokenType.Comma);
+			i = new Identifier(_currentToken);
+			parameters.Add(i);
+			Eat(TokenType.Identity);
+		}
+		Eat(TokenType.RightParen);
+		return parameters;
+	}
 	
 }

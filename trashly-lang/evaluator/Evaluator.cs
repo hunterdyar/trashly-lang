@@ -33,9 +33,9 @@ public class Evaluator
 				result = Eval(e);
 			}
 			return result;
-		}else if(node is InfixExpression ife)
+		}else if(node is InfixExpression inx)
 		{
-			return EvaluateInfix(ife);
+			return EvaluateInfix(inx);
 		}else if (node is GroupExpression gr)
 		{
 			Object result = nully;
@@ -48,6 +48,29 @@ public class Evaluator
 		}else if (node is PrefixExpression pfe)
 		{
 			return EvaluatePrefix(pfe);
+		}else if (node is IfExpression ife)
+		{
+			var condition = Eval(ife.Condition);
+			if (condition is Boolean b)
+			{
+				if (b.Value)
+				{
+					return Eval(ife.Consequence);
+				}
+				else
+				{
+					if (ife.HasAlt)
+					{
+						return Eval(ife.Alternative);
+					}
+				}
+			}
+			else
+			{
+				throw new Exception("if statements need conditional in the (), and this dont that?");
+			}
+
+			return nully;
 		}
 
 		return nully;
