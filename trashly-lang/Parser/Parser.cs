@@ -53,6 +53,7 @@ public class Parser
 		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
 		prefixGenerators.Add(TokenType.LeftBrace,ParseBlockExpression);
 		prefixGenerators.Add(TokenType.If,ParseIfExpression);
+		prefixGenerators.Add(TokenType.Function,ParseFunctionLiteral);
 	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
 		//infix
 		//todo: create "IntInfixExpression".
@@ -225,8 +226,8 @@ public class Parser
 				return ParseReturnStatement();
 			case TokenType.LeftBrace:
 				return ParseBlockStatement();
-			case TokenType.Function:
-				return ParseFunctionLiteral();
+			//case TokenType.Function:
+			//	return ParseFunctionLiteral();
 			default:
 				//ParseExpressionStatement.
 				//ExpressionNode.Expression = this.
@@ -368,12 +369,26 @@ public class Parser
 		return e;
 	}
 
-	public Node ParseFunctionLiteral()
+	public Expression ParseFunctionLiteral()
 	{
 		var e = new FunctionLiteral(_currentToken);
 		Eat(TokenType.Function);
-		e.Identity = new Identifier(_currentToken);
-		Eat(TokenType.Identity);
+		
+		//this lets us do fn(){} with no name.
+		//only useful if we store it as a variable. 
+		//if we don't, it's just a function with the name "", and you can only have one of those? i guess?
+		if (_currentToken.Type == TokenType.Identity)
+		{
+			e.Identity = new Identifier(_currentToken);
+			Eat(TokenType.Identity);
+		}
+		else
+		{
+			//we will generate an extremely random anon function name.
+			//todo: replace this with, like, just an incrementing counter in the parser? i guess?
+			e.Identity = new Identifier(new Token(TokenType.Identity,Guid.NewGuid().ToString()));
+		}
+
 		e.Parameters = ParseFunctionParameters();//eat ()
 		e.Body = ParseBlockStatement();// eat {}
 		return e;

@@ -3,7 +3,7 @@ using TrashlyLang.lexer;
 
 namespace TrashlyLang.ast;
 
-public class FunctionLiteral : Node
+public class FunctionLiteral : Expression
 {
 	public Identifier Identity;
 	public List<Identifier> Parameters = new List<Identifier>();
