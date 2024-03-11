@@ -98,7 +98,7 @@ public class Environment
 	}
 
 	//Extending The Environment
-	public Environment CreateEnclosedEnvironment()
+	public Environment? CreateEnclosedEnvironment()
 	{
 		var e = new Environment(Memory);
 		e._outerEnvironment = this;

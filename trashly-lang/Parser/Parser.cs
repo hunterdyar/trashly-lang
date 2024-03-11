@@ -287,7 +287,7 @@ public class Parser
 	{
 		var block = new BlockStatement(_currentToken);
 		Eat(TokenType.LeftBrace);
-		while (_currentToken.Type != TokenType.RightBrace)
+		while (_currentToken.Type != TokenType.RightBrace && _currentToken.Type!= TokenType.EOF)
 		{
 			var stmt = ParseStatement();
 			block.Statements.Add(stmt);

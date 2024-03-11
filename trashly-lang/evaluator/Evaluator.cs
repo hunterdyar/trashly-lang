@@ -14,11 +14,11 @@ namespace TrashlyLang.evaluator;
 
 public class Evaluator
 {
-	private Environment _environment;
+	private Environment? _environment;
 	public Memory Memory => _environment.Memory;
 	private List<Error> _errors = new List<Error>();
 	public static Null nully = new Null();
-	public Evaluator(Environment env)
+	public Evaluator(Environment? env)
 	{
 		_environment = env;
 	}
@@ -42,11 +42,11 @@ public class Evaluator
 		        return err;
 	        }
         }
-
+		
 		return result;
 	}
 
-	public Object Eval(Node node, Environment env)
+	public Object Eval(Node node, Environment? env)
 	{
 		if (node is IntegerLiteral il)
 		{
@@ -156,7 +156,7 @@ public class Evaluator
 		return nully;
 	}
 
-	private Object DoCallFunction(Function fn, Object[] args, Environment env)
+	private Object DoCallFunction(Function fn, Object[] args, Environment? env)
 	{
 		//sanity checks
 		if (fn.Definition.Parameters.Count != args.Length)
@@ -209,7 +209,7 @@ public class Evaluator
 		throw new Exception($"I can't evaluate {o} to be truthy or falsey, it should be a bool or an int.");
 	}
 
-	private Object[] EvalExpressions(List<Expression> expressions, Environment env)
+	private Object[] EvalExpressions(List<Expression> expressions, Environment? env)
 	{
 		var results = new Object[expressions.Count];
 		//call left-to-right!
@@ -225,7 +225,7 @@ public class Evaluator
 
 		return results;
 	}
-	private Object EvaluatePrefix(PrefixExpression pfe, Environment env)
+	private Object EvaluatePrefix(PrefixExpression pfe, Environment? env)
 	{
 		var right = Eval(pfe.right, env);
 		switch (pfe.Operator)
@@ -238,7 +238,7 @@ public class Evaluator
 		return new Error($"I can't do prefix op on {pfe.Operator} {pfe.right.Token.Type}");
 	}
 
-	private Object EvaluateInfix(InfixExpression ife, Environment env)
+	private Object EvaluateInfix(InfixExpression ife, Environment? env)
 	{
 		var left = Eval(ife.left, env);
 		var right = Eval(ife.right, env);

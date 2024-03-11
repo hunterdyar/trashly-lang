@@ -1,0 +1,5 @@
+﻿let four = 4;
+funk square(a){
+    return a*a
+}
+245

@@ -1,4 +1,6 @@
-﻿namespace TrashlyLang.lexer;
+﻿using TrashlyLang.objects;
+
+namespace TrashlyLang.lexer;
 
 public struct Token
 {
@@ -17,6 +19,14 @@ public struct Token
 		this.Literal = literal.ToString();
 	}
 
+	public override string ToString()
+	{
+		if (Type == TokenType.Identity || Type == TokenType.Integer || Type == TokenType.String)
+		{
+			return $"{Type.ToString()} ({Literal})";
+		}
+		return Type.ToString();
+	}
 	public static TokenType LookupTokenType(string keyword)
 	{
 		switch (keyword)
