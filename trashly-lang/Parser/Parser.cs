@@ -33,6 +33,7 @@ public class Parser
 	{
 		_lexer = lexer;
 		//order of operations init
+		_precedence.Add(TokenType.Return,1);
 		_precedence.Add(TokenType.Equals,2);
 		_precedence.Add(TokenType.NotEqual,2);
 		_precedence.Add(TokenType.LessThan,3);
@@ -55,9 +56,10 @@ public class Parser
 		prefixGenerators.Add(TokenType.LeftParen,ParseGroupedExpression);
 		prefixGenerators.Add(TokenType.LeftBrace,ParseBlockExpression);
 		prefixGenerators.Add(TokenType.If,ParseIfExpression);
-		prefixGenerators.Add(TokenType.Function,ParseFunctionLiteral);
+		//prefixGenerators.Add(TokenType.Function,ParseFunctionLiteral);
 		prefixGenerators.Add(TokenType.String,ParseStringLiteral);
 	//	prefixGenerators.Add(TokenType.LeftBrace,ParseBlockStatement);
+		prefixGenerators.Add(TokenType.Return,ParsePrefixExpression);
 		//infix
 		//todo: create "IntInfixExpression".
 		infixGenerators.Add(TokenType.Add,ParseInfixExpression);
@@ -67,6 +69,8 @@ public class Parser
 		infixGenerators.Add(TokenType.Equals,ParseInfixExpression);
 		infixGenerators.Add(TokenType.NotEqual,ParseInfixExpression);
 		infixGenerators.Add(TokenType.LeftParen,ParseCallExpression);
+		infixGenerators.Add(TokenType.LessThan,ParseInfixExpression);
+		infixGenerators.Add(TokenType.GreaterThan,ParseInfixExpression);
 		//+,-,/,*,==,!=,<,>
 	}
 
@@ -129,6 +133,7 @@ public class Parser
 		if (value != _currentToken.Type)
 		{
 			_errors.Add($"Expected {value}, got {_currentToken.Type.ToString()}. It's probably your fault, not mine.");
+			throw new Exception(_errors[^1]);
 		}
 		Next();
 	}
@@ -234,8 +239,8 @@ public class Parser
 				return ParseReturnStatement();
 			case TokenType.LeftBrace:
 				return ParseBlockStatement();
-			//case TokenType.Function:
-			//	return ParseFunctionLiteral();
+			case TokenType.Function:
+			return ParseFunctionLiteral();
 			default:
 				//ParseExpressionStatement.
 				//ExpressionNode.Expression = this.

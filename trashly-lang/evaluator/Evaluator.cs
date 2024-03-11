@@ -234,8 +234,11 @@ public class Evaluator
 				return BoolMath.Negate(right);
 			case "-":
 				return Math.Negate(right);
+			case "return":
+				return right;
 		}
 		return new Error($"I can't do prefix op on {pfe.Operator} {pfe.right.Token.Type}");
+		
 	}
 
 	private Object EvaluateInfix(InfixExpression ife, Environment? env)
@@ -262,6 +265,6 @@ public class Evaluator
 				return BoolMath.Compare(TokenType.NotEqual, left, right);
 		}
 
-		return new Error($"I can't do {ife.left.Token.Type} {ife.Operator} {ife.right.Token.Type} yet.");
+		return new Error($"I can't (infix) do {ife.left.Token.Type} {ife.Operator} {ife.right.Token.Type} yet.");
 	}
 }

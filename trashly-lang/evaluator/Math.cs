@@ -7,6 +7,7 @@ public static class Math
 {
 	public static Integer Sum(Object a, Object b)
 	{
+		
 		if (a is Integer ai && b is Integer bi)
 		{
 			//todo replace with bitwise FOR FUN.
@@ -16,7 +17,7 @@ public static class Math
 		}
 		else
 		{
-			throw new Exception($"Can't do + on {a} and {b}");
+			throw new Exception($"Can't mathly do + on {a} and {b}");
 		}
 	}
 	public static Integer Subtract(Object a, Object b)

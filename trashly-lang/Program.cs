@@ -14,19 +14,21 @@ class TrashlyLangRepl
 	private static bool viewLex = false;
 	private static bool graph = false;
 	private static bool repl = true;
-	static async Task Main(string[] args)
+	static async Task<int> Main(string[] args)
 	{
 		ParseArgs(args, out string fileName);
 		repl = fileName == "";
 		if (repl)
 		{
 			await Repl(Console.In, Console.Out);
+			return 0;
 		}
 		else
 		{
 			string program = await File.ReadAllTextAsync(fileName);
 			var output = await Execute(program,null);
 			Console.Write(output);
+			return(0);
 		}
 	}
 
@@ -81,9 +83,15 @@ class TrashlyLangRepl
         		output.AppendLine(error);
         	}
         }
-        Evaluator evaluator = new Evaluator(environment);
-        var r = evaluator.EvaluateProgram(parser);	
-       output.AppendLine(r.Inspect());
+        else
+        {
+	        //no errors Evaluate.
+	        Evaluator evaluator = new Evaluator(environment);
+	        var r = evaluator.EvaluateProgram(parser);
+
+	        output.AppendLine(r.Inspect());
+        }
+
         //todo: move the dependency to graph to it's own class/area.
         if (graph)
         {
