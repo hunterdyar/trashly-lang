@@ -6,10 +6,12 @@
         <RootNamespace>TrashlyLang</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="DotNetGraph" Version="3.0.0" />
+      <PackageReference Include="LLVMSharp" Version="16.0.0" />
       <PackageReference Include="SkiaSharp" Version="2.88.7" />
     </ItemGroup>
 

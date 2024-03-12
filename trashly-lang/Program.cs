@@ -1,8 +1,7 @@
 ﻿
 using System.Text;
-using DotNetGraph.Compilation;
-using DotNetGraph.Core;
-using DotNetGraph.Extensions;
+using LLVMSharp;
+using LLVMSharp.Interop;
 using TrashlyLang.evaluator;
 using TrashlyLang.lexer;
 using TrashlyLang.memory;
@@ -11,8 +10,6 @@ using Environment = TrashlyLang.memory.Environment;
 
 class TrashlyLangRepl
 {
-	private static bool viewLex = false;
-	private static bool graph = false;
 	private static bool repl = true;
 	static async Task<int> Main(string[] args)
 	{
@@ -40,12 +37,20 @@ class TrashlyLangRepl
 			return;
 		}
 		
-		viewLex = args.Contains("-l") || args.Contains("--lexer");
-		graph = args.Contains("-t") || args.Contains("--tree");
-		
 		file = args[0];
 	}
 
+	static unsafe async Task Build(string program)
+	{
+		Lexer lex = new Lexer(program);
+		Parser parser = new Parser(lex);
+		parser.Parse();
+		//now we have an AST
+		LLVMModuleRef module = LLVM.ModuleCreateWithName((sbyte*)0);
+		LLVMBuilderRef builder = LLVM.CreateBuilder();
+		
+
+	}
 	static async Task<string> Execute(string program, Environment? environment)
 	{
 		Memory m;
@@ -60,18 +65,6 @@ class TrashlyLangRepl
 			m = environment.Memory;
 		}
 		
-		if (viewLex)
-        {
-        	Lexer dLEx = new Lexer(program);
-        	var a = dLEx.GetAllLexDebug();
-        	foreach (var t in a)
-        	{
-        		Console.WriteLine(t.ToString());
-        	}
-
-        	Console.WriteLine("------");
-        }
-
         Lexer lex = new Lexer(program);
         Parser parser = new Parser(lex); 
         parser.Parse();
@@ -90,28 +83,6 @@ class TrashlyLangRepl
 	        var r = evaluator.EvaluateProgram(parser);
 
 	        output.AppendLine(r.Inspect());
-        }
-
-        //todo: move the dependency to graph to it's own class/area.
-        if (graph)
-        {
-        	var graph = new DotGraph().WithIdentifier("Program Root");
-        	foreach (var statement in parser.Program)
-        	{
-        		statement.ProcessGraph(graph);
-        	}
-
-        	await using var gwriter = new StringWriter();
-        	var context = new CompilationContext(gwriter, new CompilationOptions());
-        	await graph.CompileAsync(context);
-
-        	var result = gwriter.GetStringBuilder().ToString();
-
-        	// Save it to a file
-        	//await File.WriteAllTextAsync("graph.dot", result);
-        	var url = "https://dreampuf.github.io/GraphvizOnline/#" + Uri.EscapeDataString(result);
-        	output.AppendLine("---");
-        	output.AppendLine("'" + url + "'");
         }
 
         await m.Export();
